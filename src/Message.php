@@ -2,7 +2,23 @@
 
 class Message
 {
+	/** @var  int */
+	private $type;
 
+	/**
+	 * Message constructor.
+	 *
+	 * @param int $type
+	 */
+	public function __construct(int $type)
+	{
+		$this->type = $type;
+	}
+
+	public function getType(): int
+	{
+		return $this->type;
+	}
 }
 
 final class MessageType
@@ -12,4 +28,5 @@ final class MessageType
 	const ELECTION = 0x02;
 	const ELECTED_NOTICE = 0x03;
 	const DATA = 0x04;
+	const HEARTBEAT = 0x05;
 }

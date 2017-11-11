@@ -2,15 +2,13 @@
 
 require_once 'Message.php';
 
-class Node
+class Node extends Threaded
 {
 	/** Node IP:port */
 	private $ip, $port;
 
 	/** Node->next IP:port */
 	private $next_ip, $next_port;
-
-	private $socket = null;
 
 	/**
 	 * Node constructor.
@@ -22,16 +20,6 @@ class Node
 	{
 		$this->ip = $ip;
 		$this->port = $port;
-		$this->next_ip = $ip;
-		$this->next_port = $port;
-	}
-
-	public function __destruct()
-	{
-		if ($this->socket)
-		{
-			fclose($this->socket);
-		}
 	}
 
 	public function join($ip, $port)
@@ -41,18 +29,15 @@ class Node
 			$this->quit();
 		}
 
-		$this->socket = fsockopen($ip, $port, $errno, $errstr, 5);
-
-		if (!$this->socket)
-		{
-			throw new Exception("Unable to open socket: " . $errstr, $errno);
-		}
+		$this->next_ip = $ip;
+		$this->next_port = $port;
+		$this->connect();
 
 	}
 
 	private function isNodeAlone(): bool
 	{
-		return $this->ip == $this->next_ip && $this->port == $this->next_port;
+		return !$this->next_ip || ($this->ip == $this->next_ip && $this->port == $this->next_port);
 	}
 
 	public function quit()
@@ -61,19 +46,54 @@ class Node
 		{
 			return;
 		}
-
 		//TODO
+	}
+
+	public function connect()
+	{
+		if (!$this->next_ip || !$this->next_port)
+		{
+			throw new Exception("No other known node!");
+		}
+
+		$socket = stream_socket_client("tcp://" . $this->next_ip . ":" . $this->next_port, $errno, $errstr, 5);
+
+		if (!$socket)
+		{
+			throw new Exception("Unable to open socket: $errstr ($errno)");
+		}
+
+		return $socket;
+
 	}
 
 	public function crash()
 	{
 		$this->next_ip = $this->ip;
 		$this->next_port = $this->port;
-		if ($this->socket)
+	}
+
+	public function sendBeat()
+	{
+		$this->send(new Message(MessageType::HEARTBEAT));
+	}
+
+	private function send(Message $message)
+	{
+		$data = serialize($message);
+		echo "-> " . $data . "\n";
+
+		$socket = $this->connect();
+		if (fwrite($socket, $data) === false)
 		{
-			fclose($this->socket);
-			$this->socket = null;
+			throw new Exception("Unable to write to socket");
 		}
+		fclose($socket);
+	}
+
+	public function panic()
+	{
+
 	}
 
 }
