@@ -46,7 +46,31 @@ class Node extends Threaded
 		{
 			return;
 		}
-		//TODO
+
+		$msg = new Message();
+		$msg->setType(MessageType::QUIT_NOTICE);
+		$msg->setFrom($this->endpoint);
+		$msg->setTo(Endpoint::broadcast());
+		$msg->setData($this->nextEndpoint);
+
+		$this->send($msg);
+	}
+
+	public function handleQuit(Message $msg)
+	{
+		if ($msg->getFrom() == $this->nextEndpoint)
+		{
+			$this->changeNextHop($msg->getData());
+			if ($msg->getData() == $this->leaderEndpoint)
+			{
+				// we need a new leader!
+				$this->callForLeaderElection();
+			}
+		}
+		else
+		{
+			$this->forward($msg);
+		}
 	}
 
 	public function connect()

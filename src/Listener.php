@@ -107,6 +107,9 @@ class Listener extends Thread
 				}
 				break;
 
+			case MessageType::QUIT_NOTICE:
+				$this->node->handleQuit($msg);
+				break;
 
 		}
 	}
