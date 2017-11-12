@@ -86,14 +86,24 @@ class Listener extends Thread
 				$this->node->acceptNewNode($msg);
 				break;
 
-			case MessageType::DATA:
-				if ($this->endpoint != $msg->getTo())
+			case MessageType::DATA_PROPAGATE:
+				if ($this->node->isLeader())
 				{
+					$msg->setType(MessageType::DATA_PERSIST);
+					$this->node->handleData($msg);
 					$this->node->forward($msg);
 				}
 				else
 				{
+					$this->node->forward($msg);
+				}
+				break;
+
+			case MessageType::DATA_PERSIST:
+				if (!$this->node->isLeader())
+				{
 					$this->node->handleData($msg);
+					$this->node->forward($msg);
 				}
 				break;
 

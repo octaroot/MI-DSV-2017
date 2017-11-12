@@ -84,6 +84,11 @@ class Node extends Threaded
 		}
 	}
 
+	public function isLeader() : bool
+	{
+		return $this->leaderEndpoint == $this->endpoint;
+	}
+
 	public function forward(Message $message)
 	{
 		$this->send($message);

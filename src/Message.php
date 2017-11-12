@@ -107,7 +107,8 @@ final class MessageType
 	const QUIT_NOTICE = 'QUIT_NOTICE';
 	const ELECTION = 'ELECTION';
 	const ELECTED_NOTICE = 'ELECTION_NOTICE';
-	const DATA = 'DATA';
+	const DATA_PROPAGATE = 'DATA_PROPAGATE';
+	const DATA_PERSIST = 'DATA_PERSIST';
 	const HEARTBEAT = 'HEATBEAT';
 	const PANIC = 'PANIC';
 	const JOIN_REPLY = 'JOIN_REPLY';
