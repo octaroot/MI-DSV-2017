@@ -38,7 +38,8 @@ class Listener extends Thread
 			if (strlen($buf) > 0)
 			{
 				$msg = unserialize($buf);
-				echo '<- ' . $msg . "\n";
+
+				Log::getInstance()->log('<- ' . $msg);
 
 				$this->handleMessage($msg);
 			}

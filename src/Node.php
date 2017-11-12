@@ -120,8 +120,8 @@ class Node extends Threaded
 
 	private function sendTo(Endpoint $endpoint, Message $message)
 	{
+		Log::getInstance()->log("-> " . $message);
 		$data = serialize($message);
-		echo "-> " . $message . "\n";
 
 		$socket = $this->connectTo($endpoint);
 		if (fwrite($socket, $data) === false)
@@ -163,7 +163,7 @@ class Node extends Threaded
 
 	public function changeNextHop(Endpoint $next)
 	{
-		ECHO "CHANGIN NEXT TO $next \n";
+		Log::getInstance()->log("Changing next hop to: " .  $next);
 		$this->nextEndpoint = $next;
 		$this->connect();
 	}
@@ -231,7 +231,7 @@ class Node extends Threaded
 		}
 		catch (Exception $e)
 		{
-			echo "FAILED TO SEND HEATBEAT\n";
+			Log::getInstance()->log("Sending heartbeat packets failed");
 		}
 	}
 
