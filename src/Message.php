@@ -8,6 +8,25 @@ class Message
 	/** @var Endpoint */
 	private $from, $to;
 
+	/** @var mixed */
+	private $data;
+
+	/**
+	 * @return mixed
+	 */
+	public function getData()
+	{
+		return $this->data;
+	}
+
+	/**
+	 * @param mixed $data
+	 */
+	public function setData($data)
+	{
+		$this->data = $data;
+	}
+
 	/**
 	 * @return int
 	 */
@@ -67,4 +86,6 @@ final class MessageType
 	const ELECTED_NOTICE = 0x03;
 	const DATA = 0x04;
 	const HEARTBEAT = 0x05;
+	const PANIC = 0x06;
+
 }
