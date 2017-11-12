@@ -64,4 +64,16 @@ class Endpoint
 	{
 		return $this->port;
 	}
+
+	public function __toString()
+	{
+		if ($this->isBroadcast())
+		{
+			return "Broadcast";
+		}
+		else
+		{
+			return $this->ip . ':' . $this->port;
+		}
+	}
 }

@@ -2,7 +2,7 @@
 
 class Message
 {
-	/** @var  int */
+	/** @var  string */
 	private $type;
 
 	/** @var Endpoint */
@@ -28,17 +28,17 @@ class Message
 	}
 
 	/**
-	 * @return int
+	 * @return string
 	 */
-	public function getType(): int
+	public function getType(): string
 	{
 		return $this->type;
 	}
 
 	/**
-	 * @param int $type
+	 * @param string $type
 	 */
-	public function setType(int $type)
+	public function setType(string $type)
 	{
 		$this->type = $type;
 	}
@@ -75,18 +75,41 @@ class Message
 		$this->to = $to;
 	}
 
+	public function __toString()
+	{
+		$output = [];
+		if ($this->type)
+		{
+			$output[] = "[" . $this->type . "]";
+		}
+		if ($this->from)
+		{
+			$output[] = 'From: ' . $this->from;
+		}
+		if ($this->to)
+		{
+			$output[] = 'To: ' . $this->to;
+		}
+		if ($this->data)
+		{
+			$output[] = $this->data;
+		}
+
+		return implode(', ', $output);
+	}
+
 
 }
 
 final class MessageType
 {
-	const JOIN_REQUEST = 0x0;
-	const QUIT_NOTICE = 0x1;
-	const ELECTION = 0x02;
-	const ELECTED_NOTICE = 0x03;
-	const DATA = 0x04;
-	const HEARTBEAT = 0x05;
-	const PANIC = 0x06;
-	const JOIN_REPLY = 0x07;
+	const JOIN_REQUEST = 'JOIN_REQUEST';
+	const QUIT_NOTICE = 'QUIT_NOTICE';
+	const ELECTION = 'ELECTION';
+	const ELECTED_NOTICE = 'ELECTION_NOTICE';
+	const DATA = 'DATA';
+	const HEARTBEAT = 'HEATBEAT';
+	const PANIC = 'PANIC';
+	const JOIN_REPLY = 'JOIN_REPLY';
 
 }
