@@ -59,6 +59,18 @@ class Listener extends Thread
 				$this->heartbeat->updateTimestamp();
 				break;
 
+			case MessageType::PANIC:
+				try
+				{
+					$this->node->forward($msg);
+				}
+				catch (Exception $e)
+				{
+					// this node's nextEndpoint is dead
+					$this->node->changeNextHop($msg->getData());
+					$this->node->callForLeaderElection();
+				}
+
 		}
 	}
 }
