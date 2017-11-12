@@ -72,6 +72,7 @@ class Node extends Threaded
 		$msg = new Message();
 		$msg->setFrom($this->endpoint);
 		$msg->setTo($this->nextEndpoint);
+		$msg->setType(MessageType::HEARTBEAT);
 
 		$this->send($msg);
 	}

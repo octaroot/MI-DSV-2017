@@ -9,11 +9,17 @@ class Message
 	private $from, $to;
 
 	/**
-	 * Message constructor.
-	 *
+	 * @return int
+	 */
+	public function getType(): int
+	{
+		return $this->type;
+	}
+
+	/**
 	 * @param int $type
 	 */
-	public function __construct(int $type)
+	public function setType(int $type)
 	{
 		$this->type = $type;
 	}
