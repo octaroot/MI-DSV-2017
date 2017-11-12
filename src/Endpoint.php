@@ -30,7 +30,25 @@ class Endpoint
 		return $instance;
 	}
 
+	public static function uid($uid)
+	{
+		$instance = new self();
+		$instance->port = $uid & 0xFFFF;
+		$instance->ip = long2ip($uid >> 16);
+		$instance->is_broadcast = false;
 
+		return $instance;
+	}
+
+	public function getUID()
+	{
+		if ($this->isBroadcast())
+		{
+			throw new Exception("Broadcast is not a single endpoint, cannot get UID");
+		}
+
+		return (ip2long($this->ip) << 16) + $this->port;
+	}
 
 	public function isBroadcast()
 	{
