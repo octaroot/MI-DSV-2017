@@ -3,6 +3,7 @@
 error_reporting(0);
 
 require_once 'Message.php';
+require_once 'MessageType.php';
 require_once 'Listener.php';
 require_once 'Heartbeat.php';
 require_once 'Node.php';

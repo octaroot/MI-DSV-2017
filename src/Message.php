@@ -1,5 +1,7 @@
 <?php
 
+require_once 'MessageType.php';
+
 class Message
 {
 	/** @var  string */
@@ -97,20 +99,4 @@ class Message
 
 		return implode(', ', $output);
 	}
-
-
-}
-
-final class MessageType
-{
-	const JOIN_REQUEST = 'JOIN_REQUEST';
-	const QUIT_NOTICE = 'QUIT_NOTICE';
-	const ELECTION = 'ELECTION';
-	const ELECTED_NOTICE = 'ELECTION_NOTICE';
-	const DATA_PROPAGATE = 'DATA_PROPAGATE';
-	const DATA_PERSIST = 'DATA_PERSIST';
-	const HEARTBEAT = 'HEATBEAT';
-	const PANIC = 'PANIC';
-	const JOIN_REPLY = 'JOIN_REPLY';
-
 }
