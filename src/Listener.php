@@ -1,26 +1,30 @@
 <?php
 
 require_once 'Message.php';
+require_once 'Endpoint.php';
 
 class Listener extends Thread
 {
+	/** @var Node */
 	private $node;
 
+	/** @var Heartbeat */
 	private $heartbeat;
 
-	private $ip, $port;
+	/** @var Endpoint */
+	private $endpoint;
 
-	public function __construct(Node $node, Heartbeat $heartbeat, $ip, $port)
+	public function __construct(Node $node, Heartbeat $heartbeat, Endpoint $endpoint)
 	{
 		$this->node = $node;
 		$this->heartbeat = $heartbeat;
-		$this->ip = $ip;
-		$this->port = $port;
+		$this->endpoint = $endpoint;
 	}
 
 	public function run()
 	{
-		if (false === ($sock = stream_socket_server("tcp://" . $this->ip . ":" . $this->port, $errno, $errstr)))
+		if (false === ($sock = stream_socket_server("tcp://" . $this->endpoint->getIP() . ":" . $this->endpoint->getPort(),
+				$errno, $errstr)))
 		{
 			throw new Exception("$errstr ($errno)");
 		}

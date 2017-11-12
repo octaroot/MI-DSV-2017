@@ -5,6 +5,9 @@ class Message
 	/** @var  int */
 	private $type;
 
+	/** @var Endpoint */
+	private $from, $to;
+
 	/**
 	 * Message constructor.
 	 *
@@ -15,10 +18,39 @@ class Message
 		$this->type = $type;
 	}
 
-	public function getType(): int
+	/**
+	 * @return Endpoint
+	 */
+	public function getFrom(): Endpoint
 	{
-		return $this->type;
+		return $this->from;
 	}
+
+	/**
+	 * @param Endpoint $from
+	 */
+	public function setFrom(Endpoint $from)
+	{
+		$this->from = $from;
+	}
+
+	/**
+	 * @return Endpoint
+	 */
+	public function getTo(): Endpoint
+	{
+		return $this->to;
+	}
+
+	/**
+	 * @param Endpoint $to
+	 */
+	public function setTo(Endpoint $to)
+	{
+		$this->to = $to;
+	}
+
+
 }
 
 final class MessageType

@@ -4,6 +4,7 @@ require_once 'Message.php';
 require_once 'Listener.php';
 require_once 'Heartbeat.php';
 require_once 'Node.php';
+require_once 'Endpoint.php';
 
 define('NODE_VERSION', 1);
 define('DEFAULT_PORT', 12345);
@@ -64,11 +65,11 @@ if (empty($targetPort))
 
 echo "\nOK, konfigurace dokoncena.\n\tNode: $nodeIP:$nodePort\n\tCil: $targetIP:$targetPort\n ... zahajuji komunikaci ...\n\n";
 
-$node = new Node($nodeIP, $nodePort);
+$node = new Node(Endpoint::single($nodeIP, $nodePort));
 $heartbeat = new Heartbeat($node);
-$listener = new Listener($node, $heartbeat, $nodeIP, $nodePort);
+$listener = new Listener($node, $heartbeat, Endpoint::single($nodeIP, $nodePort));
 
 $listener->start();
 $heartbeat->start();
 
-$node->join($targetIP, $targetPort);
+$node->join(Endpoint::single($targetIP, $targetPort));

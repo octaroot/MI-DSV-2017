@@ -4,40 +4,34 @@ require_once 'Message.php';
 
 class Node extends Threaded
 {
-	/** Node IP:port */
-	private $ip, $port;
-
-	/** Node->next IP:port */
-	private $next_ip, $next_port;
+	/** @var  Endpoint */
+	private $endpoint, $nextEndpoint;
 
 	/**
 	 * Node constructor.
 	 *
-	 * @param $ip
-	 * @param $port
+	 * @param $endpoint
 	 */
-	public function __construct($ip, $port)
+	public function __construct($endpoint)
 	{
-		$this->ip = $ip;
-		$this->port = $port;
+		$this->endpoint = $endpoint;
 	}
 
-	public function join($ip, $port)
+	public function join($endpoint)
 	{
 		if (!$this->isNodeAlone())
 		{
 			$this->quit();
 		}
 
-		$this->next_ip = $ip;
-		$this->next_port = $port;
+		$this->nextEndpoint = $endpoint;
 		$this->connect();
 
 	}
 
 	private function isNodeAlone(): bool
 	{
-		return !$this->next_ip || ($this->ip == $this->next_ip && $this->port == $this->next_port);
+		return !$this->nextEndpoint || ($this->nextEndpoint == $this->endpoint);
 	}
 
 	public function quit()
@@ -51,12 +45,13 @@ class Node extends Threaded
 
 	public function connect()
 	{
-		if (!$this->next_ip || !$this->next_port)
+		if (!$this->nextEndpoint)
 		{
 			throw new Exception("No other known node!");
 		}
 
-		$socket = stream_socket_client("tcp://" . $this->next_ip . ":" . $this->next_port, $errno, $errstr, 5);
+		$socket = stream_socket_client("tcp://" . $this->nextEndpoint->getIp() . ":" . $this->nextEndpoint->getPort(),
+			$errno, $errstr, 5);
 
 		if (!$socket)
 		{
@@ -69,13 +64,16 @@ class Node extends Threaded
 
 	public function crash()
 	{
-		$this->next_ip = $this->ip;
-		$this->next_port = $this->port;
+		$this->nextEndpoint = $this->endpoint;
 	}
 
 	public function sendBeat()
 	{
-		$this->send(new Message(MessageType::HEARTBEAT));
+		$msg = new Message();
+		$msg->setFrom($this->endpoint);
+		$msg->setTo($this->nextEndpoint);
+
+		$this->send($msg);
 	}
 
 	private function send(Message $message)
