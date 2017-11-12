@@ -61,7 +61,7 @@ class Node extends Threaded
 
 	private function connectTo(Endpoint $endpoint)
 	{
-		$socket = stream_socket_client("tcp://" . $endpoint, $errno, $errstr, 5);
+		$socket = stream_socket_client("tcp://" . $endpoint, $errno, $errstr, 2);
 
 		if (!$socket)
 		{
@@ -134,6 +134,7 @@ class Node extends Threaded
 
 	public function changeNextHop(Endpoint $next)
 	{
+		ECHO "CHANGIN NEXT TO $next \n";
 		$this->nextEndpoint = $next;
 		$this->connect();
 	}
@@ -195,7 +196,14 @@ class Node extends Threaded
 		$msg->setTo($this->nextEndpoint);
 		$msg->setType(MessageType::HEARTBEAT);
 
-		$this->send($msg);
+		try
+		{
+			$this->send($msg);
+		}
+		catch (Exception $e)
+		{
+			echo "FAILED TO SEND HEATBEAT\n";
+		}
 	}
 
 	public function panic()
