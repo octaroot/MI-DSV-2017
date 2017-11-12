@@ -70,6 +70,36 @@ class Listener extends Thread
 					$this->node->changeNextHop($msg->getData());
 					$this->node->callForLeaderElection();
 				}
+				break;
+
+			case MessageType::ELECTION:
+				$this->node->participateInLeaderElection($msg);
+				break;
+
+			case MessageType::ELECTED_NOTICE:
+				$this->node->acknowledgeLeaderNotice($msg);
+				break;
+
+			case MessageType::JOIN_REPLY:
+				$this->node->join($msg->getData());
+				break;
+
+			case MessageType::JOIN_REQUEST:
+				$this->node->acceptNewNode($msg);
+				break;
+
+			case MessageType::DATA:
+				if ($this->endpoint != $msg->getTo())
+				{
+					$this->node->forward($msg);
+				}
+				else
+				{
+					$this->node->handleData($msg);
+				}
+				break;
+
+
 
 		}
 	}

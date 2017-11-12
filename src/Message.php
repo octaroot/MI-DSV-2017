@@ -87,5 +87,6 @@ final class MessageType
 	const DATA = 0x04;
 	const HEARTBEAT = 0x05;
 	const PANIC = 0x06;
+	const JOIN_REPLY = 0x07;
 
 }

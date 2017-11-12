@@ -31,7 +31,6 @@ class Node extends Threaded
 		$this->nextEndpoint = $endpoint;
 		$this->leaderEndpoint = null;
 		$this->connect();
-		$this->callForLeaderElection();
 
 	}
 
@@ -69,38 +68,6 @@ class Node extends Threaded
 
 	}
 
-	public function callForLeaderElection()
-	{
-		$this->electionParticipant = true;
-		$this->leaderEndpoint = null;
-
-		$msg = new Message();
-		$msg->setTo(Endpoint::broadcast());
-		$msg->setType(MessageType::ELECTION);
-		$msg->setData($this->endpoint);
-
-		$this->send($msg);
-	}
-
-	private function send(Message $message)
-	{
-		$data = serialize($message);
-		echo "-> " . $data . "\n";
-
-		$socket = $this->connect();
-		if (fwrite($socket, $data) === false)
-		{
-			throw new Exception("Unable to write to socket");
-		}
-		fclose($socket);
-	}
-
-	public function changeNextHop(Endpoint $next)
-	{
-		$this->nextEndpoint = $next;
-		$this->connect();
-	}
-
 	public function acknowledgeLeaderNotice(Message $msg)
 	{
 		$this->electionParticipant = false;
@@ -116,6 +83,52 @@ class Node extends Threaded
 	public function forward(Message $message)
 	{
 		$this->send($message);
+	}
+
+	private function send(Message $message)
+	{
+		$data = serialize($message);
+		echo "-> " . $data . "\n";
+
+		$socket = $this->connect();
+		if (fwrite($socket, $data) === false)
+		{
+			throw new Exception("Unable to write to socket");
+		}
+		fclose($socket);
+	}
+
+	public function acceptNewNode(Message $msg)
+	{
+		$this->changeNextHop($msg->getFrom());
+
+		$reply = new Message();
+		$reply->setType(MessageType::JOIN_REPLY);
+		$reply->setTo($msg->getFrom());
+		$reply->setFrom($this->endpoint);
+		$reply->setData($this->nextEndpoint);
+
+		$this->send($reply);
+		$this->callForLeaderElection();
+	}
+
+	public function changeNextHop(Endpoint $next)
+	{
+		$this->nextEndpoint = $next;
+		$this->connect();
+	}
+
+	public function callForLeaderElection()
+	{
+		$this->electionParticipant = true;
+		$this->leaderEndpoint = null;
+
+		$msg = new Message();
+		$msg->setTo(Endpoint::broadcast());
+		$msg->setType(MessageType::ELECTION);
+		$msg->setData($this->endpoint);
+
+		$this->send($msg);
 	}
 
 	public function participateInLeaderElection(Message $msg)
@@ -174,6 +187,11 @@ class Node extends Threaded
 		$msg->setType(MessageType::PANIC);
 
 		$this->send($msg);
+	}
+
+	public function handleData(Message $msg)
+	{
+		//TODO
 	}
 
 }
