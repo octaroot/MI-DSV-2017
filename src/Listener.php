@@ -23,8 +23,7 @@ class Listener extends Thread
 
 	public function run()
 	{
-		if (false === ($sock = stream_socket_server("tcp://" . $this->endpoint->getIP() . ":" . $this->endpoint->getPort(),
-				$errno, $errstr)))
+		if (false === ($sock = stream_socket_server("tcp://" . $this->endpoint, $errno, $errstr)))
 		{
 			throw new Exception("$errstr ($errno)");
 		}
@@ -38,9 +37,8 @@ class Listener extends Thread
 
 			if (strlen($buf) > 0)
 			{
-				echo '<- ' . $buf . "\n";
-
 				$msg = unserialize($buf);
+				echo '<- ' . $msg . "\n";
 
 				$this->handleMessage($msg);
 			}
@@ -98,7 +96,6 @@ class Listener extends Thread
 					$this->node->handleData($msg);
 				}
 				break;
-
 
 
 		}

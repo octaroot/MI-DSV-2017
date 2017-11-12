@@ -65,11 +65,24 @@ if (empty($targetPort))
 
 echo "\nOK, konfigurace dokoncena.\n\tNode: $nodeIP:$nodePort\n\tCil: $targetIP:$targetPort\n ... zahajuji komunikaci ...\n\n";
 
-$node = new Node(Endpoint::single($nodeIP, $nodePort));
+$endpoint = Endpoint::single($nodeIP, $nodePort);
+$targetEndpoint = Endpoint::single($targetIP, $targetPort);
+
+$node = new Node($endpoint);
 $heartbeat = new Heartbeat($node);
-$listener = new Listener($node, $heartbeat, Endpoint::single($nodeIP, $nodePort));
+$listener = new Listener($node, $heartbeat, $endpoint);
 
 $listener->start();
 $heartbeat->start();
 
-$node->join(Endpoint::single($targetIP, $targetPort));
+$node->connect();
+
+while (!$listener->isStarted())
+{
+	sleep(1);
+}
+
+if ($endpoint != $targetEndpoint)
+{
+	$node->askToJoin($targetEndpoint);
+}

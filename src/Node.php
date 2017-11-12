@@ -16,7 +16,7 @@ class Node extends Threaded
 	 */
 	public function __construct($endpoint)
 	{
-		$this->endpoint = $this->leaderEndpoint = $endpoint;
+		$this->endpoint = $this->nextEndpoint = $this->leaderEndpoint = $endpoint;
 		$this->electionParticipant = false;
 	}
 
@@ -56,8 +56,12 @@ class Node extends Threaded
 			throw new Exception("No other known node!");
 		}
 
-		$socket = stream_socket_client("tcp://" . $this->nextEndpoint->getIp() . ":" . $this->nextEndpoint->getPort(),
-			$errno, $errstr, 5);
+		return $this->connectTo($this->nextEndpoint);
+	}
+
+	private function connectTo(Endpoint $endpoint)
+	{
+		$socket = stream_socket_client("tcp://" . $endpoint, $errno, $errstr, 5);
 
 		if (!$socket)
 		{
@@ -85,12 +89,12 @@ class Node extends Threaded
 		$this->send($message);
 	}
 
-	private function send(Message $message)
+	private function sendTo(Endpoint $endpoint, Message $message)
 	{
 		$data = serialize($message);
-		echo "-> " . $data . "\n";
+		echo "-> " . $message . "\n";
 
-		$socket = $this->connect();
+		$socket = $this->connectTo($endpoint);
 		if (fwrite($socket, $data) === false)
 		{
 			throw new Exception("Unable to write to socket");
@@ -98,15 +102,31 @@ class Node extends Threaded
 		fclose($socket);
 	}
 
+	private function send(Message $message)
+	{
+		return $this->sendTo($this->nextEndpoint, $message);
+	}
+
+	public function askToJoin(Endpoint $target)
+	{
+		$msg = new Message();
+		$msg->setType(MessageType::JOIN_REQUEST);
+		$msg->setFrom($this->endpoint);
+		$msg->setTo($target);
+
+		$this->sendTo($target, $msg);
+	}
+
 	public function acceptNewNode(Message $msg)
 	{
-		$this->changeNextHop($msg->getFrom());
 
 		$reply = new Message();
 		$reply->setType(MessageType::JOIN_REPLY);
 		$reply->setTo($msg->getFrom());
 		$reply->setFrom($this->endpoint);
 		$reply->setData($this->nextEndpoint);
+
+		$this->changeNextHop($msg->getFrom());
 
 		$this->send($reply);
 		$this->callForLeaderElection();
