@@ -7,8 +7,6 @@ final class Chat extends Threaded
 
 	private $name;
 
-	private $isConnected = true;
-
 	/**
 	 * Chat constructor.
 	 *
@@ -56,15 +54,13 @@ final class Chat extends Threaded
 
 			case 'quit':
 				$this->node->quit();
-				$this->isConnected = false;
+
+				//sleep 0.5s
+				usleep(500000);
+
+				posix_kill(posix_getpid(), 15);
+				break;
 		}
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isConnected(): bool
-	{
-		return $this->isConnected;
-	}
 }

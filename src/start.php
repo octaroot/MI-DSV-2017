@@ -86,7 +86,7 @@ else
 
 $chat = new Chat($node);
 
-while ($chat->isConnected())
+while (true)
 {
 	$chat->sendMessage(readline());
 }
