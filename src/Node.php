@@ -9,6 +9,8 @@ class Node extends Threaded
 
 	private $electionParticipant;
 
+	private $hasQuit;
+
 	/**
 	 * Node constructor.
 	 *
@@ -18,6 +20,16 @@ class Node extends Threaded
 	{
 		$this->endpoint = $this->nextEndpoint = $this->leaderEndpoint = $endpoint;
 		$this->electionParticipant = false;
+	}
+
+	public function getLeaderEndpoint()
+	{
+		return $this->leaderEndpoint;
+	}
+
+	public function getNodeEndpoint()
+	{
+		return $this->endpoint;
 	}
 
 	public function join($endpoint)
@@ -32,6 +44,7 @@ class Node extends Threaded
 		$this->leaderEndpoint = null;
 		$this->connect();
 
+		Output::log("Connected. You can start chatting now.\n\n");
 	}
 
 	private function isNodeAlone(): bool
@@ -56,12 +69,25 @@ class Node extends Threaded
 		$this->send($msg);
 	}
 
+	public function sendChatMessage($chatMessage)
+	{
+		$msg = new Message();
+		$msg->setType(MessageType::DATA_PROPAGATE);
+		$msg->setFrom($this->endpoint);
+		$msg->setTo(Endpoint::broadcast());
+		$msg->setData($chatMessage);
+
+		$this->send($msg);
+	}
+
 	public function handleQuit(Message $msg)
 	{
 		if ($msg->getFrom() == $this->nextEndpoint)
 		{
+			Logger::log('OUR NEXT HOP JUST QUIT, SWITCHING TO ANOTHER');
 			$this->changeNextHop($msg->getData());
-			if ($msg->getData() == $this->leaderEndpoint)
+			$this->connect();
+			if ($msg->getFrom() == $this->leaderEndpoint)
 			{
 				// we need a new leader!
 				$this->callForLeaderElection();
@@ -120,7 +146,7 @@ class Node extends Threaded
 
 	private function sendTo(Endpoint $endpoint, Message $message)
 	{
-		Log::getInstance()->log("-> " . $message);
+		Logger::log("-> " . $message);
 		$data = serialize($message);
 
 		$socket = $this->connectTo($endpoint);
@@ -163,7 +189,7 @@ class Node extends Threaded
 
 	public function changeNextHop(Endpoint $next)
 	{
-		Log::getInstance()->log("Changing next hop to: " .  $next);
+		Logger::log("Changing next hop to: " .  $next);
 		$this->nextEndpoint = $next;
 		$this->connect();
 	}
@@ -231,7 +257,7 @@ class Node extends Threaded
 		}
 		catch (Exception $e)
 		{
-			Log::getInstance()->log("Sending heartbeat packets failed");
+			Logger::log("Sending heartbeat packets failed");
 		}
 	}
 
@@ -248,7 +274,10 @@ class Node extends Threaded
 
 	public function handleData(Message $msg)
 	{
-		//TODO
+		/** @var ChatMessage $cm */
+		$cm = $msg->getData();
+
+		Output::log($cm);
 	}
 
 }

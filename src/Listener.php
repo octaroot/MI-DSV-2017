@@ -39,7 +39,7 @@ class Listener extends Thread
 			{
 				$msg = unserialize($buf);
 
-				Log::getInstance()->log('<- ' . $msg);
+				Logger::log('<- ' . $msg);
 
 				$this->handleMessage($msg);
 			}
@@ -104,6 +104,11 @@ class Listener extends Thread
 				if (!$this->node->isLeader())
 				{
 					$this->node->handleData($msg);
+
+					/** @var ChatMessage $cm */
+					$cm = $msg->getData();
+					$cm->updateDateTime();
+
 					$this->node->forward($msg);
 				}
 				break;

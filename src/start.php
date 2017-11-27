@@ -1,8 +1,11 @@
 <?php
 
-error_reporting(0);
+//error_reporting(0);
 
-require_once 'Log.php';
+require_once 'Logger.php';
+require_once 'ChatMessage.php';
+require_once 'Chat.php';
+require_once 'Output.php';
 require_once 'Message.php';
 require_once 'MessageType.php';
 require_once 'Listener.php';
@@ -15,38 +18,23 @@ define('DEFAULT_PORT', 12345);
 
 $ips = explode(' ', trim(`hostname -I`));
 
-echo <<<EOF
-Vitejte.
-
-Toto je rozhrani komunikacniho uzlu v ramci semestralniho projektu MI-DSV.16.
-
-Predne je potreba zadat IP adresu a port, na kterem bude uzel provozovan.
-
-Napoveda: Vsechny dostupne IP adresy tohoto uzlu:
-
-EOF;
+echo "Possible IPs: " . implode(', ', $ips) . "\n";
 
 foreach ($ips as $ip)
 {
 	readline_add_history($ip);
-	echo "\t$ip\n";
 }
 
-echo "\n";
-
-$nodeIP = readline("IP adresa tohoto uzlu: ");
-
-echo "\nPort pro komunikaci [" . DEFAULT_PORT . "]: ";
+$nodeIP = readline("Listen IP (e.g. 127.0.0.1):");
 
 readline_clear_history();
 
-$nodePort = readline();
+$nodePort = readline("Listen port [" . DEFAULT_PORT . "]: ");
 if (empty($nodePort))
 {
-	$nodePort = "12345";
+	$nodePort = DEFAULT_PORT;
 }
-
-echo "\nDale zadejte IP adresu a port uzlu, ke kteremu se tento uzel pokusi pripojit:\n";
+echo "\n";
 
 readline_clear_history();
 
@@ -55,19 +43,18 @@ foreach ($ips as $ip)
 	readline_add_history($ip);
 }
 
-$targetIP = readline('Cilova IP adresa: ');
-
-echo "\nCilovy port [" . DEFAULT_PORT . "]: ";
+$targetIP = readline('Connect to IP: ');
 
 readline_clear_history();
 
-$targetPort = readline();
+$targetPort = readline("\nConnect to port [" . DEFAULT_PORT . "]: ");
 if (empty($targetPort))
 {
-	$targetPort = "12345";
+	$targetPort = DEFAULT_PORT;
 }
 
-echo "\nOK, konfigurace dokoncena.\n\tNode: $nodeIP:$nodePort\n\tCil: $targetIP:$targetPort\n ... zahajuji komunikaci ...\n\n";
+Output::log("Connection to $targetIP:$targetPort");
+Logger::log("\nOK, node: $nodeIP:$nodePort connecting to $targetIP:$targetPort\n\n");
 
 $endpoint = Endpoint::single($nodeIP, $nodePort);
 $targetEndpoint = Endpoint::single($targetIP, $targetPort);
@@ -90,3 +77,17 @@ if ($endpoint != $targetEndpoint)
 {
 	$node->askToJoin($targetEndpoint);
 }
+else
+{
+	Output::log("You are the only node in the network.");
+	Output::log("Connected. You can start chatting now.\n\n");
+}
+
+$chat = new Chat($node);
+
+while ($chat->isConnected())
+{
+	$chat->sendMessage(readline());
+}
+
+$listener->done = true;
