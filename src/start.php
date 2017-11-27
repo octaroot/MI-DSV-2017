@@ -90,5 +90,3 @@ while ($chat->isConnected())
 {
 	$chat->sendMessage(readline());
 }
-
-$listener->done = true;
