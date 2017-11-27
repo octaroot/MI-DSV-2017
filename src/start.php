@@ -1,3 +1,4 @@
+#!/usr/local/bin/php
 <?php
 
 //error_reporting(0);
