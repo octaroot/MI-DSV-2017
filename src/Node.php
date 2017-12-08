@@ -269,7 +269,7 @@ class Node extends Threaded
 		$msg->setTo($this->nextEndpoint);
 		$msg->setType(MessageType::PANIC);
 
-		$this->send($msg);
+		$this->sendTo($this->endpoint, $msg);
 	}
 
 	public function handleData(Message $msg)
